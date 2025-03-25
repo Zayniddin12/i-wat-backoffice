@@ -1,0 +1,24 @@
+variables:
+   RSYNC_EXCLUDES: "--exclude=.git/ --exclude=node_modules/ --exclude=.gitlab-ci.yml --exclude=.env"
+   WORK_DIR: /var/www/i-watt/i-watt-backoffice-frontend
+   TAG: 228_server
+   
+stages:
+  - install_and_deploy
+
+deploy:
+  stage: install_and_deploy
+  script:
+    - sudo rsync -rult --delete-after $RSYNC_EXCLUDES $CI_PROJECT_DIR/ $WORK_DIR/
+    - cd $WORK_DIR
+    - sudo chown -R gitlab-runner:gitlab-runner /var/www/i-watt/i-watt-backoffice-frontend
+    - source ~/.nvm/nvm.sh
+    - nvm use 18
+    - yarn
+    - yarn build
+
+  tags:
+    - $TAG
+  timeout: 1 hour
+  only:
+    - master
